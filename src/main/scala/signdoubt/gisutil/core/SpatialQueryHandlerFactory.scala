@@ -3,6 +3,8 @@ package signdoubt.gisutil.core
 import signdoubt.gisutil._
 import signdoubt.gisutil.store.{InMemoryKeyValueStore, InMemorySortedStore, KeyValueStore, SortedStore}
 
+import scala.collection.mutable
+
 object SpatialQueryHandlerFactory {
   /**
     * [[SubSpace]] aware search implementation of [[SpatialQueryHandler]] (in-memory version).
@@ -75,4 +77,12 @@ private class NaiveFullScanQueryHandler[V](val store: KeyValueStore[RoundedPoint
     store.toIterable.filter(_._1.overlap(rectangle))
 
   override def delete(point: RoundedPoint): Unit = store.delete(point)
+
+  override def nearestNeighbor(base: RoundedPoint, k: Int): Iterable[(RoundedPoint, V)] = {
+    val distance = new DistanceHelper[V](base)
+    val queue = new mutable.PriorityQueue[(RoundedPoint, V)]()(Ordering.by(distance.to).reverse)
+    store.toIterable.foreach(tuple => queue.enqueue(tuple))
+    for (i <- 0 until Math.min(queue.size, k)) yield queue.dequeue()
+  }
+
 }
