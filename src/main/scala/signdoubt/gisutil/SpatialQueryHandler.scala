@@ -38,6 +38,14 @@ trait SpatialQueryHandler[V] {
     * @param point a point to be deleted
     */
   def delete(point: RoundedPoint): Unit
+
+  /**
+    * Search and returns k-nearest neighbors.
+    * @param base base point
+    * @param k search count of neighbors
+    * @return k-nearest neighbors
+    */
+  def nearestNeighbor(base: RoundedPoint, k: Int): Iterable[(RoundedPoint, V)] = throw new NotImplementedError()
 }
 
 /**
